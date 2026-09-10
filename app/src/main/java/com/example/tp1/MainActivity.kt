@@ -78,7 +78,7 @@ fun PantallaPrincipal(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Â¡Hola Mundo!")
+        Text(text = "¡Hola Mundo!")
 
         Spacer(modifier = Modifier.height(16.dp))
 
