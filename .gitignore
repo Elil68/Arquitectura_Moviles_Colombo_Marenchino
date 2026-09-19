@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase client config (contains the project's API key)
+/app/google-services.json
