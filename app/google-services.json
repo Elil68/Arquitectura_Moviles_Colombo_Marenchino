@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878704460199",
+    "project_id": "arquitecturas-moviles",
+    "storage_bucket": "arquitecturas-moviles.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878704460199:android:6c2931c371849e44a57682",
+        "android_client_info": {
+          "package_name": "com.example.tp1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk5Vy54vnH1nIcxFcSSDE6nYgZ8QHKk3M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
