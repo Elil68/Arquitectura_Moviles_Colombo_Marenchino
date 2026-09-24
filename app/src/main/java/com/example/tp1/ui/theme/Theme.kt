@@ -12,32 +12,55 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = SlateBluePrimaryDark,
+    onPrimary = SlateBlueOnPrimaryDark,
+    primaryContainer = SlateBluePrimaryContainerDark,
+    onPrimaryContainer = SlateBlueOnPrimaryContainerDark,
+    secondary = SlateBlueSecondaryDark,
+    onSecondary = SlateBlueOnSecondaryDark,
+    secondaryContainer = SlateBlueSecondaryContainerDark,
+    onSecondaryContainer = SlateBlueOnSecondaryContainerDark,
+    tertiary = SlateBlueTertiaryDark,
+    onTertiary = SlateBlueOnTertiaryDark,
+    background = SlateBlueBackgroundDark,
+    onBackground = SlateBlueOnBackgroundDark,
+    surface = SlateBlueSurfaceDark,
+    onSurface = SlateBlueOnSurfaceDark,
+    surfaceVariant = SlateBlueSurfaceVariantDark,
+    onSurfaceVariant = SlateBlueOnSurfaceVariantDark,
+    outline = SlateBlueOutlineDark,
+    error = SlateBlueErrorDark,
+    onError = SlateBlueOnErrorDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = SlateBluePrimaryLight,
+    onPrimary = SlateBlueOnPrimaryLight,
+    primaryContainer = SlateBluePrimaryContainerLight,
+    onPrimaryContainer = SlateBlueOnPrimaryContainerLight,
+    secondary = SlateBlueSecondaryLight,
+    onSecondary = SlateBlueOnSecondaryLight,
+    secondaryContainer = SlateBlueSecondaryContainerLight,
+    onSecondaryContainer = SlateBlueOnSecondaryContainerLight,
+    tertiary = SlateBlueTertiaryLight,
+    onTertiary = SlateBlueOnTertiaryLight,
+    background = SlateBlueBackgroundLight,
+    onBackground = SlateBlueOnBackgroundLight,
+    surface = SlateBlueSurfaceLight,
+    onSurface = SlateBlueOnSurfaceLight,
+    surfaceVariant = SlateBlueSurfaceVariantLight,
+    onSurfaceVariant = SlateBlueOnSurfaceVariantLight,
+    outline = SlateBlueOutlineLight,
+    error = SlateBlueErrorLight,
+    onError = SlateBlueOnErrorLight
 )
 
 @Composable
 fun TP1Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Paleta propia "Azul corporativo": desactivado por defecto para no perder
+    // la identidad visual con el color dinámico del wallpaper (Android 12+).
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

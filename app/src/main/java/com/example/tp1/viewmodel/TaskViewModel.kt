@@ -128,6 +128,22 @@ class TaskViewModel : ViewModel() {
         }
     }
 
+    fun reorderUndatedTasks(orderedTaskIds: List<String>) {
+        val userId = authRepository.currentUserId() ?: return
+
+        taskRepository.updateTaskOrder(
+            userId = userId,
+            orderedTaskIds = orderedTaskIds
+        ) { result ->
+            result.onFailure { exception ->
+                uiState = uiState.copy(
+                    errorMessage = exception.localizedMessage
+                        ?: "No se pudo reordenar la tarea."
+                )
+            }
+        }
+    }
+
     fun stopListening() {
         listener?.remove()
         listener = null

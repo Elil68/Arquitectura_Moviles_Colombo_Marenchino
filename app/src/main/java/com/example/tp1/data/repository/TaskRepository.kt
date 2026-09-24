@@ -32,7 +32,10 @@ class TaskRepository {
                             ?.copy(id = document.id)
                     }
                     .orEmpty()
-                    .sortedWith(compareBy(nullsLast()) { task -> task.endDate })
+                    .sortedWith(
+                        compareBy<AcademicTask, Long?>(nullsLast()) { task -> task.endDate }
+                            .thenBy { task -> task.order }
+                    )
 
                 onChange(tasks)
             }
@@ -52,6 +55,8 @@ class TaskRepository {
             "completed" to false,
             "startDate" to startDate,
             "endDate" to endDate,
+            // Las tareas nuevas van al final del orden manual (ver AcademicTask.order).
+            "order" to System.currentTimeMillis(),
             "createdAt" to FieldValue.serverTimestamp()
         )
 
@@ -74,6 +79,26 @@ class TaskRepository {
         tasksCollection(userId)
             .document(taskId)
             .update("completed", completed)
+            .addOnSuccessListener {
+                onResult(Result.success(Unit))
+            }
+            .addOnFailureListener { exception ->
+                onResult(Result.failure(exception))
+            }
+    }
+
+    fun updateTaskOrder(
+        userId: String,
+        orderedTaskIds: List<String>,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        val batch = database.batch()
+
+        orderedTaskIds.forEachIndexed { index, taskId ->
+            batch.update(tasksCollection(userId).document(taskId), "order", index.toLong())
+        }
+
+        batch.commit()
             .addOnSuccessListener {
                 onResult(Result.success(Unit))
             }

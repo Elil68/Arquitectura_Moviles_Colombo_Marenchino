@@ -85,6 +85,9 @@ fun AppNavHost() {
                 onDeleteTask = { task ->
                     taskViewModel.deleteTask(task)
                 },
+                onReorderTasks = { orderedIds ->
+                    taskViewModel.reorderUndatedTasks(orderedIds)
+                },
                 onLogout = {
                     taskViewModel.stopListening()
                     authViewModel.logout()
