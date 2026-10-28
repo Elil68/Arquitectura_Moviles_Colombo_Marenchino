@@ -1,5 +1,6 @@
 package com.example.tp1.ui.tasks
 
+import android.widget.Toast
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -45,10 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.tp1.data.model.AcademicTask
+import com.example.tp1.util.AnalyticsLogger
+import com.example.tp1.util.CalendarIntentHelper
+import com.example.tp1.util.DueDateWarning
 import com.example.tp1.viewmodel.TaskUiState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -67,6 +73,7 @@ fun TaskListScreen(
     onStartListening: () -> Unit,
     onStopListening: () -> Unit,
     onAddTask: (String, String, Long?, Long?) -> Unit,
+    onCheckDueDate: (Long, (DueDateWarning?) -> Unit) -> Unit,
     onToggleTask: (AcademicTask) -> Unit,
     onDeleteTask: (AcademicTask) -> Unit,
     onReorderTasks: (List<String>) -> Unit,
@@ -375,6 +382,7 @@ fun TaskListScreen(
     if (showAddDialog) {
         AddTaskDialog(
             onDismiss = { showAddDialog = false },
+            onCheckDueDate = onCheckDueDate,
             onConfirm = { title, description, startDate, endDate ->
                 onAddTask(title, description, startDate, endDate)
                 showAddDialog = false
@@ -562,6 +570,28 @@ private fun TaskItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
+                if (task.endDate != null) {
+                    val context = LocalContext.current
+                    TextButton(
+                        onClick = {
+                            val exported = CalendarIntentHelper.exportTaskToCalendar(context, task)
+                            if (exported) {
+                                AnalyticsLogger(context).logTaskExportedToCalendar()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "No hay una aplicación de calendario instalada.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    ) {
+                        Text("Calendario")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
                 TextButton(onClick = onDelete) {
                     Text("Eliminar")
                 }
@@ -580,14 +610,32 @@ private fun TaskItem(
 @Composable
 private fun AddTaskDialog(
     onDismiss: () -> Unit,
+    onCheckDueDate: (Long, (DueDateWarning?) -> Unit) -> Unit,
     onConfirm: (String, String, Long?, Long?) -> Unit
 ) {
+    val context = LocalContext.current
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf<Long?>(null) }
     var endDate by remember { mutableStateOf<Long?>(null) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    var endDateWarning by remember { mutableStateOf<DueDateWarning?>(null) }
+
+    LaunchedEffect(endDate) {
+        val currentEndDate = endDate
+        if (currentEndDate == null) {
+            endDateWarning = null
+        } else {
+            onCheckDueDate(currentEndDate) { warning ->
+                endDateWarning = warning
+                warning?.let {
+                    val type = if (it is DueDateWarning.Holiday) "holiday" else "weekend"
+                    AnalyticsLogger(context).logDueDateWarning(type)
+                }
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -628,6 +676,20 @@ private fun AddTaskDialog(
                     onPick = { showEndDatePicker = true },
                     onClear = { endDate = null }
                 )
+
+                endDateWarning?.let { warning ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = when (warning) {
+                            is DueDateWarning.Holiday ->
+                                "El vencimiento cae en un feriado: ${warning.name}."
+                            DueDateWarning.Weekend ->
+                                "El vencimiento cae en fin de semana."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         },
         confirmButton = {

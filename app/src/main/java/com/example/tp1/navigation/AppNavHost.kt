@@ -79,6 +79,9 @@ fun AppNavHost() {
                 onAddTask = { title, description, startDate, endDate ->
                     taskViewModel.addTask(title, description, startDate, endDate)
                 },
+                onCheckDueDate = { millis, onResult ->
+                    taskViewModel.checkDueDateWarning(millis, onResult)
+                },
                 onToggleTask = { task ->
                     taskViewModel.toggleTask(task)
                 },

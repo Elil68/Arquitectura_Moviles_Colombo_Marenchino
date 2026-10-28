@@ -1,19 +1,22 @@
 package com.example.tp1.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import com.example.tp1.data.repository.AuthRepository
+import com.example.tp1.util.AnalyticsLogger
 
 data class AuthUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AuthRepository()
+    private val analytics = AnalyticsLogger(application)
 
     var uiState by mutableStateOf(AuthUiState())
         private set
@@ -38,6 +41,7 @@ class AuthViewModel : ViewModel() {
 
         repository.login(email.trim(), password) { result ->
             result.onSuccess {
+                analytics.logLogin()
                 uiState = AuthUiState()
                 onSuccess()
             }.onFailure { exception ->
@@ -80,6 +84,7 @@ class AuthViewModel : ViewModel() {
 
         repository.register(email.trim(), password) { result ->
             result.onSuccess {
+                analytics.logSignUp()
                 uiState = AuthUiState()
                 onSuccess()
             }.onFailure { exception ->
