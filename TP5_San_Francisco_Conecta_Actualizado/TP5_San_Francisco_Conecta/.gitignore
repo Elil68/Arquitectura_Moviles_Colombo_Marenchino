@@ -1,0 +1,6 @@
+datos/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+.env

@@ -1,0 +1,6 @@
+datos
+*.sqlite*
+.git
+.env
+test
+*.pdf
