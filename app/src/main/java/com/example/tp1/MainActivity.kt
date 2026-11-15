@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.tp1.navigation.AppNavHost
+import com.example.tp1.ui.tasks.LocalDemoScreen
 import com.example.tp1.ui.theme.TP1Theme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +16,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TP1Theme {
-                AppNavHost()
+                if (BuildConfig.DEBUG && BuildConfig.LOCAL_DEMO) {
+                    LocalDemoScreen()
+                } else {
+                    AppNavHost()
+                }
             }
         }
     }
