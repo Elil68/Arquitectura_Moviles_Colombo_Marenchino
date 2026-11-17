@@ -59,6 +59,8 @@ fun LocalDemoScreen() {
                         if (it.id == selected.id) it.copy(completed = !it.completed) else it
                     }
                 },
+                // Demo local: sin consulta de feriados (no hay red ni Firebase).
+                onCheckDueDate = { _, onResult -> onResult(null) },
                 onDeleteTask = { selected -> tasks = tasks.filterNot { it.id == selected.id } },
                 onReorderTasks = { ids ->
                     tasks = tasks.map { task ->
