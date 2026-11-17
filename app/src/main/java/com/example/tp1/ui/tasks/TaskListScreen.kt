@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -56,6 +57,7 @@ import com.example.tp1.util.StreakRules
 import com.example.tp1.util.AnalyticsLogger
 import com.example.tp1.util.CalendarIntentHelper
 import com.example.tp1.util.DueDateWarning
+import com.example.tp1.ui.ads.TestBanner
 import com.example.tp1.viewmodel.TaskUiState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -136,6 +138,11 @@ fun TaskListScreen(
         rangeStart != null || rangeEnd != null || selectedSections != ALL_SECTIONS
 
     Scaffold(
+        bottomBar = {
+            Box(Modifier.fillMaxWidth().navigationBarsPadding()) {
+                TestBanner()
+            }
+        },
         topBar = {
             TopAppBar(
                 title = { Text("Mis tareas") },
@@ -286,7 +293,9 @@ fun TaskListScreen(
                     else -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
+                            contentPadding = PaddingValues(
+                                start = 16.dp, top = 16.dp, end = 16.dp, bottom = 96.dp
+                            ),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             if (overdueTasks.isNotEmpty()) {

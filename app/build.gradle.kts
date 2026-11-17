@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-ads:25.5.0")
     // Firebase BoM (maneja las versiones automáticamente)
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
 
@@ -24,6 +25,7 @@ android {
     }
 
     defaultConfig {
+        buildConfigField("boolean", "LOCAL_DEMO", "false")
         applicationId = "com.example.tp1"
         minSdk = 24
         targetSdk = 37
@@ -34,6 +36,12 @@ android {
     }
 
     buildTypes {
+        create("demo") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".demo"
+            matchingFallbacks += listOf("debug")
+            buildConfigField("boolean", "LOCAL_DEMO", "true")
+        }
         release {
             optimization {
                 enable = false
@@ -45,8 +53,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
+}
+
+// The local, debuggable demonstration uses no Firebase configuration.
+// Keep the Google Services processing unchanged for normal debug/release builds.
+tasks.matching { it.name == "processDemoGoogleServices" }.configureEach {
+    enabled = false
 }
 
 dependencies {
