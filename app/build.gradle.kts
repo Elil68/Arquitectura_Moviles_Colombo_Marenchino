@@ -12,6 +12,9 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+
+    // Firebase Cloud Messaging (notificaciones push - TP6 retención)
+    implementation("com.google.firebase:firebase-messaging")
 }
 
 android {

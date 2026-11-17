@@ -45,4 +45,21 @@ class AnalyticsLogger(context: Context) {
         }
         analytics.logEvent("due_date_warning_shown", params)
     }
+
+    // --- Retención (TP6) ---
+
+    fun logPushReceived(campaign: String) {
+        val params = Bundle().apply { putString("campaign", campaign) }
+        analytics.logEvent("push_received", params)
+    }
+
+    fun logStreakUpdated(streak: Int) {
+        val params = Bundle().apply { putLong("streak", streak.toLong()) }
+        analytics.logEvent("streak_updated", params)
+    }
+
+    fun logAchievementUnlocked(id: String) {
+        val params = Bundle().apply { putString("achievement_id", id) }
+        analytics.logEvent("achievement_unlocked", params)
+    }
 }

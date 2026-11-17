@@ -7,8 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tp1.data.model.AcademicTask
+import com.example.tp1.data.model.RetentionProgress
 import com.example.tp1.data.repository.AuthRepository
 import com.example.tp1.data.repository.HolidayRepository
+import com.example.tp1.data.repository.RetentionRepository
 import com.example.tp1.data.repository.TaskRepository
 import com.example.tp1.util.AnalyticsLogger
 import com.example.tp1.util.DueDateRules
@@ -20,7 +22,8 @@ import java.util.Calendar
 data class TaskUiState(
     val isLoading: Boolean = true,
     val tasks: List<AcademicTask> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val retention: RetentionProgress = RetentionProgress()
 )
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,8 +31,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskRepository = TaskRepository()
     private val authRepository = AuthRepository()
     private val holidayRepository = HolidayRepository()
+    private val retentionRepository = RetentionRepository()
     private val analytics = AnalyticsLogger(application)
     private var listener: ListenerRegistration? = null
+    private var retentionListener: ListenerRegistration? = null
 
     var uiState by mutableStateOf(TaskUiState())
         private set
@@ -49,10 +54,17 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
         uiState = uiState.copy(isLoading = true)
 
+        // Retención: token push + temas de campañas, última apertura y progreso.
+        retentionRepository.registerDevice(userId)
+        retentionRepository.touchLastOpen(userId)
+        retentionListener = retentionRepository.observeProgress(userId) { progress ->
+            uiState = uiState.copy(retention = progress)
+        }
+
         listener = taskRepository.observeTasks(
             userId = userId,
             onChange = { tasks ->
-                uiState = TaskUiState(
+                uiState = uiState.copy(
                     isLoading = false,
                     tasks = tasks
                 )
@@ -118,11 +130,25 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         ) { result ->
             result.onSuccess {
                 analytics.logTaskStatusChanged(newCompleted)
+                if (newCompleted) recordCompletion(userId)
             }.onFailure { exception ->
                 uiState = uiState.copy(
                     errorMessage = exception.localizedMessage
                         ?: "No se pudo actualizar la tarea."
                 )
+            }
+        }
+    }
+
+    /** Actualiza la racha y los logros; registra los eventos para medir retención. */
+    private fun recordCompletion(userId: String) {
+        val before = uiState.retention.achievements.toSet()
+        retentionRepository.recordCompletion(userId) { result ->
+            result.onSuccess { progress ->
+                analytics.logStreakUpdated(progress.streak)
+                (progress.achievements.toSet() - before).forEach {
+                    analytics.logAchievementUnlocked(it)
+                }
             }
         }
     }
@@ -177,11 +203,14 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun stopListening() {
         listener?.remove()
         listener = null
+        retentionListener?.remove()
+        retentionListener = null
         uiState = TaskUiState()
     }
 
     override fun onCleared() {
         listener?.remove()
+        retentionListener?.remove()
         super.onCleared()
     }
 }

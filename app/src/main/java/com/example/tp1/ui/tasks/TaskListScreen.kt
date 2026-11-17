@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.tp1.data.model.AcademicTask
+import com.example.tp1.util.StreakRules
 import com.example.tp1.util.AnalyticsLogger
 import com.example.tp1.util.CalendarIntentHelper
 import com.example.tp1.util.DueDateWarning
@@ -156,6 +157,8 @@ fun TaskListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            ProgressCard(state)
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -784,5 +787,36 @@ private fun DatePickerModal(
         }
     ) {
         DatePicker(state = datePickerState)
+    }
+}
+
+/** Gamificación: racha de días seguidos y logros desbloqueados. */
+@Composable
+private fun ProgressCard(state: TaskUiState) {
+    val progress = state.retention
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = "Racha: ${progress.streak} " + if (progress.streak == 1) "día" else "días",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Mejor racha: ${progress.bestStreak} · Tareas completadas: ${progress.totalCompleted}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            if (progress.achievements.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Logros: " + progress.achievements.joinToString(" · ") {
+                        StreakRules.ACHIEVEMENT_TITLES[it] ?: it
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     }
 }
